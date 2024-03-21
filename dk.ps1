@@ -11,7 +11,8 @@ param(
     [Parameter(Position = 2)]
     [string]$arg2,
     [Parameter(Position = 3)]
-    [string]$arg3
+    [string]$arg3,
+    [string]$arg4
 )
 
 #@ .check-prerequisite
@@ -32,14 +33,32 @@ else {
     $namedirs = @{}
 }
 
+#@ ..check-rdeeToolkit-python
+$pyv = python --version
+if (-not $?) {
+    Write-Error "Cannot find python command: $pyv" -ErrorAction Stop
+}
+$mmp = $pyv.Split(" ")[1].Split(".")
+if ([int]$mmp[0] -lt 3 -or [int]$mmp[1] -lt 9) {
+    Write-Error "Version of python must be greater than or equal with 3.9, now is ${pyv}" -ErrorAction Stop
+}
+python -m rdee > $null
+if (-not $?) {
+    Write-Error "Cannot find rdee module" -ErrorAction Stop
+}
+
+
 function s {
     param(
-        [Parameter(Mandatory = $true)]
         [string]$name,
         [string]$path
     )
 
-    if ($null -eq $path) {
+    
+    if ("" -eq $name) {
+        $name = "main"
+    }
+    if ("" -eq $path) {
         $path = "."
     }
 
@@ -47,23 +66,38 @@ function s {
     if (-not (Test-Path $target_path)) {
         Write-Warning "The provided path doesn't exist"
     }
-    $namedirs[$name] = $target_path
+    $namedirs[$name] = python -m rdee -f path2wsl $target_path
+    Write-Output $namedirs
     ConvertTo-Json $namedirs | Set-Content $env:reSG_dat -Encoding UTF8 -Force
 }
 
 function g {
     param(
-        [Parameter(Mandatory = $true)]
         [string]$name
     )
+
+    if ($name -eq "") {
+        $name = "main"
+    }
+
+    if ($name -eq "list") {
+        Write-Host $env:reSG_dat
+        $namedirs
+        return
+    }
 
     if (-not $namedirs.Contains($name)) {
         Write-Error "Cannot find key: $name in $reSG_dat" -ErrorAction Stop
     }
-    Write-Host $namedirs[$name]
-    Set-Location $namedirs[$name]
+    $path = $namedirs[$name]
+    if ($IsLinux) {
+        Write-Host $path
+    }
+    else {
+        $path_win = python -m rdee -f path2win $path
+        Set-Location $path_win
+    }
 }
-
 
 
 #@ mains

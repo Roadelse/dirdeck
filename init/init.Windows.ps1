@@ -6,7 +6,7 @@ $myDir = $PSScriptRoot
 
 
 if ($IsLinux) {
-    Write-Error "To be developed" -ErrorAction Stop
+    Write-Error "This init script can only be used in Windows, please use init.Linux.sh, either" -ErrorAction Stop
 }
 elseif ($IsWindows) {
     [Environment]::SetEnvironmentVariable("reSG_dat", "$myDir/.reSG_dat", [EnvironmentVariableTarget]::User)
@@ -21,7 +21,7 @@ elseif ($IsWindows) {
     else {
         Write-Host "Skip appending env:PATH, due to existence"
     }
-    New-Item -ItemType SymbolicLink -Path "$rdeeBin\dk.ps1" -Target "$myDir\dk.ps1"
+    New-Item -ItemType SymbolicLink -Path "$rdeeBin\dk.ps1" -Target "$myDir\..\dk.ps1"
 }
 else {
     Write-Error "Unsupported operation system, nor Linux neither Windows" -ErrorAction Stop
