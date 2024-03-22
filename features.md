@@ -1,6 +1,7 @@
 # features
 
 ## To-Be-Done
++ (x) add functionality from rdeeToolkit & reSync
 + (×) Too slow in WSL now...Maybe not use powershell for some basic s&g functionality??
 
 ## Done
