@@ -80,7 +80,7 @@ EOF
 # <.binary> organize executable
 # <..dk>
 mkdir -p $binary_dir && cd $_
-ln -sf $(realpath $myDir/../dk.ps1) dk
+ln -sf $(realpath $myDir/../dk.ps1) .
 
 # <.setenv>
 cat <<EOF >$setenvfile

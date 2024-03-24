@@ -1,8 +1,9 @@
 #!/usr/bin/env pwsh
 #Requires -Version 7
 
-#@ prepare
 
+#@ prepare
+#@ .param
 param(
     [Parameter(Position = 0)]
     [string]$action,
@@ -14,8 +15,11 @@ param(
     [string]$arg3,
     [string]$arg4,
     [Alias("h")]
-    [switch]$help
+    [switch]$help,
+    [switch]$shortcut
 )
+
+# $ErrorActionPreference = "Stop"
 
 
 #@ .help
@@ -23,13 +27,15 @@ if ($help) {
     Write-Output @"
 [~] Usage
     dk.ps1 <action> [target]
-    dk <action> [target], for Linux rdee deployment
 
 Supported actions:
     ●`e[33m s `e[0m
     ●`e[33m g `e[0m
     ●`e[33m del `e[0m
     ●`e[33m clear `e[0m
+    
+    ●`e[33m wln `e[0m
+        create links via windows symlink or windows shortcut
 
 Global options:
     ● -h, -help
@@ -74,6 +80,20 @@ else {
 #     Write-Error "Cannot find rdee module" -ErrorAction Stop
 # }
 
+# Write-Host $PSCommandPath
+$myself = Get-Item $PSCommandPath
+if ($myself.Attributes -match "ReparsePoint") {
+    $myself = Get-Item $myself.Target
+}
+# Write-Host "myself=$myself"
+$myDir = $myself.DirectoryName
+# Write-Host "myDir=$myDir"
+
+. (Join-Path $myDir "base.ps1")
+
+# if ($IsWindows) {
+#     return
+# }
 
 function s {
     param(
@@ -120,10 +140,11 @@ function g {
     $path = $namedirs[$name]
     if ($IsLinux) {
         Write-Host $path
+        Set-Location $path
     }
     else {
-        # $path_win = python -m rdee -f path2win $path
         $path_win = path2win $path
+        Write-Host $path_win
         Set-Location $path_win
     }
 }
@@ -158,45 +179,83 @@ function clearSG() {
 }
 
 
-function path2win() {
-    param(
-        [Parameter(Mandatory = $true)]
-        [string]$path_wsl
-    )
-    if ($path_wsl -match "[A-Z]:\\") {
-        #@ branch already be a windows path
-        return $path_wsl
-    }
-    if (-not $path_wsl.StartsWith("/mnt/")) {
-        #@ branch not a win-in-wsl path
-        Write-Error "Cannot convert a pure wsl path into windows path! $path_wsl" -ErrorAction Stop
+Function createShortcut($src, $dst, [string]$icon = "none") {
+    # echo "src=$src, ddst=$ddst"
+
+    if (-not $IsWindows) {
+        Write-Error "This fuction can only be used in Windows" -ErrorAction Stop
     }
 
-    $path_win = $path_wsl.Substring(5, 1).ToUpper() + ":\"
-    if ($path_wsl.Length -ge 7) {
-        $path_wsl.Substring(7, $path_wsl.Length - 7).Replace("/", "\") 
+    $WScriptShell = New-Object -ComObject WScript.Shell
+    
+    if (Test-Path -Path $dst -PathType Container) {
+        $dst = $dst + "\" + [System.IO.Path]::GetFileName($src) + ".lnk"
     }
-    return $path_win
-}
 
-function path2wsl() {
-    param(
-        # Parameter help description
-        [Parameter(Mandatory = $true)]
-        [string]$path_win
-    )
-    if ($path_win.StartsWith("/")) {
-        #@ branch already be a wsl path
-        return $path_win
+    if (-not $dst.Endswith(".lnk")) {
+        $dst = $dst + ".lnk"
     }
-    if (-not ($path_win -match "[A-Z]:\\")) {
-        Write-Error "Not a windows path! $path_win" -ErrorAction Stop
+    # Write-Host "(createShortcut) src=$src"
+    # Write-Host "(createShortcut) dst=$dst"
+
+    $Shortcut = $WScriptShell.CreateShortcut($dst)
+    $Shortcut.TargetPath = $src
+    if ($icon -ne "none") {
+        $shortcut.IconLocation = $icon
     }
-    $path_wsl = "/mnt/" + $path_win.Substring(0, 1).ToLower() + $path_win.Substring(3, $path_win.Length - 3).Replace("\", "/")
-    return $path_wsl
+    #Save the Shortcut to the TargetPath
+    $Shortcut.Save()
 }
 
 
+function wln() {
+    param(
+        [Parameter(Mandatory = $true)]
+        [string]$src,
+        [string]$dst,
+        [switch]$shortcut
+    )
+
+    if (-not $dst) {
+        $dst = $PWD
+    }
+
+    # Write-Host $PWD.Path
+
+    $src_wr = [wurin]::new($src)
+    $dst_wr = [wurin]::new($dst)
+
+    if ($IsWSL) {
+        # Write-Host "Calling windows!"
+        # Write-Host "dk.ps1 wln $($src_wr.uri_win) $($dst_wr.uri_win) -shortcut:`$$shortcut"
+        pwsh.exe -c "dk.ps1 wln $($src_wr.uri_win) $($dst_wr.uri_win) -shortcut:`$$shortcut"
+        return
+    }
+    elseif ($IsWindows) {
+        if ($shortcut) {
+            createShortcut $src_wr.uri_win $dst_wr.uri_win
+        }
+        else {
+            if (Test-Path $dst_wr.uri_win -PathType Container) {
+                $dst_path = $dst_wr.uri_win + "\" + $src_wr.basename()
+            }
+            else {
+                $dst_path = $dst_wr.uri_win
+            }
+            # Write-Host "src=$($src_wr.uri_win)"
+            # Write-Host "dst=$($dst_path)"
+            New-Item -ItemType SymbolicLink -Path $dst_Path -Target $src_wr.uri_win -Force > $null
+        }
+    }
+
+}
+
+function cdf() {
+    param(
+        [string]$uri
+    )
+    # To-Be-Done
+}
 
 #@ mains
 switch ($action) {
@@ -211,6 +270,9 @@ switch ($action) {
     }
     "clear" {
         clearSG
+    }
+    "wln" {
+        wln $arg1 $arg2 -shortcut:$shortcut
     }
     default {
         Write-Error "Error! Unknown action: $action" -ErrorAction Stop
