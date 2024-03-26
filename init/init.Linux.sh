@@ -35,12 +35,6 @@ if [[ -z $(which pwsh 2>/dev/null) ]]; then
     exit 200
 fi
 
-#@ <..rdeeToolkit>
-if [[ ! -e "$myDir/../../rdeeToolkit" ]]; then
-    echo -e "\033[31m Error! \033[0m Cannot find Git::rdeeToolkit in $myDir/../rdeeToolkit, whose txtop.ra-nlines.py is necessary"
-    exit 200
-fi
-
 #@ <.arguments>
 #@ <..default>
 binary_dir=${PWD}/bin
@@ -80,7 +74,8 @@ EOF
 # <.binary> organize executable
 # <..dk>
 mkdir -p $binary_dir && cd $_
-ln -sf $(realpath $myDir/../dk.ps1) .
+ln -sf $(realpath $myDir/../bin/dk.ps1) .
+ln -sf $(realpath $myDir/../bin/robs.ps1) .
 
 # <.setenv>
 cat <<EOF >$setenvfile

@@ -32,7 +32,8 @@ if (-not $env_path_user.Contains($rdeeBin)) {
 else {
     Write-Host "Skip appending env:PATH, due to existence"
 }
-New-Item -ItemType SymbolicLink -Path "$rdeeBin\dk.ps1" -Target "$myDir\..\dk.ps1" -Force
+New-Item -ItemType SymbolicLink -Path "$rdeeBin\dk.ps1" -Target "$myDir\..\bin\dk.ps1" -Force
+New-Item -ItemType SymbolicLink -Path "$rdeeBin\robs.ps1" -Target "$myDir\..\bin\robs.ps1" -Force
 
 @"
 # >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> dirdeck
