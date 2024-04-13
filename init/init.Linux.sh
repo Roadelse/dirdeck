@@ -8,7 +8,7 @@
 #    ● generate modulefile                                #
 # --------------------------------------------------------#
 # by Roadelse                                             #
-#                                                         #
+#                                                          #
 # 2024-03-21    created                                   #
 ###########################################################
 
@@ -74,8 +74,7 @@ EOF
 # <.binary> organize executable
 # <..dk>
 mkdir -p $binary_dir && cd $_
-ln -sf $(realpath $myDir/../bin/dk.ps1) .
-ln -sf $(realpath $myDir/../bin/robs.ps1) .
+ln -sf $(realpath $myDir/../bin/dk.py) .
 
 # <.setenv>
 cat <<EOF >$setenvfile
@@ -83,7 +82,7 @@ cat <<EOF >$setenvfile
 
 export PATH=${binary_dir}:\$PATH
 export reSG_dat=$myDir/.reSG_dat
-. $myDir/supp.Linux.sh
+. $myDir/../source/setenv.Linux.sh
 
 EOF
 
@@ -92,8 +91,8 @@ cat <<EOF >$modulefile
 
 prepend-path PATH ${binary_dir}
 setenv reSG_dat $myDir/.reSG_dat
-if { [module-info mode load] } { puts "source $myDir/supp.Linux.sh" }
-if { [module-info mode remove] } { puts "source $myDir/supp.Linux.sh unload" }
+if { [module-info mode load] } { puts "source $myDir/../source/setenv.Linux.sh" }
+if { [module-info mode remove] } { puts "source $myDir/../source/setenv.Linux.sh unload" }
 
 EOF
 
@@ -116,7 +115,7 @@ module use $moduledir
 module load dirdeck
 
 EOF
-        python3 $myDir/../../rdeeToolkit/bin/io/txtop.ra-nlines.py $profile .temp
+        python $myDir/txtop.ra-nlines.py $profile .temp
         rm -f .temp
     elif [[ $sm == "setenv" ]]; then
         cat <<EOF >>.temp
@@ -124,7 +123,7 @@ EOF
 source $setenvfile
 
 EOF
-        python3 $myDir/../../rdeeToolkit/bin/io/txtop.ra-nlines.py $profile .temp
+        python $myDir/txtop.ra-nlines.py $profile .temp
         rm -f .temp
     else
         echo "Unknown input: $sm"
