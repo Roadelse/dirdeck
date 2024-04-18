@@ -1,15 +1,15 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 # coding=utf-8
 
 #@ <Introduction>
-#@ This script aims to create/append/replace the given multiple string lines into a base file.
+#@ This script aims to create/append/replace the given text block into a base file.
 #@ It can be implement in many tricks, such as sed or awk, but this scripts provides a more simple and general way 
 #@ to do it, avoiding heavy coding at each time.
 #@ [-] Usage
-#@      ● python3 txtop.ra-nlines.py utest   # do the unit test
-#@      ● python3 txtop.ra-nlines.py basefile rafile   # replace/append content in rafile into basefile
-#@      ● python3 txtop.ra-nlines.py basefile rafile -a $header   # set header content for operation:append
-#@      ● python3 txtop.ra-nlines.py basefile rafile -r   # only do operation:replace, do not append
+#@      ● python3 fileop.ra-block.py utest   # do the unit test
+#@      ● python3 fileop.ra-block.py basefile rafile   # replace/append content in rafile into basefile
+#@      ● python3 fileop.ra-block.py basefile rafile -a $header   # set header content for operation:append
+#@      ● python3 fileop.ra-block.py basefile rafile -r   # only do operation:replace, do not append
 #@ ----------------------------------------------------------------
 #@ 2024-04-12       rebuild     | use argparse to resolve command line arguments now
 #@ 2024-02-20       Init

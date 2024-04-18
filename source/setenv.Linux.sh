@@ -3,14 +3,20 @@
 #@ unload | unload the function definitions
 if [[ "$1" == "unload" ]]; then
     unset -f s g dms
+    unset __dmspy reSG_dat
     return
 fi
 
+#@ load
+#@ .prepare
+script_realpath=$(realpath "${BASH_SOURCE[0]}")
+script_dir=$(dirname $script_realpath)
+export __dmspy=$(realpath $script_dir/../bin/dms.py)
+export reSG_dat=$script_dir/../deploy/.reSG_dat
 
-#@ core
 #@ .dms | wrapper & executer for dms.py
-function dms(){
-    rst=`dms.py $*`
+function dms() {
+    rst=$($__dmspy $*)
     echo $rst
     if [[ $? -ne 0 ]]; then
         return
