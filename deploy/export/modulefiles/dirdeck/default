@@ -1,0 +1,6 @@
+#%Module1.0
+
+if { [module-info mode load] } { puts "source /mnt/d/recRoot/GitRepos/dirdeck/deploy/../source/setenv.Linux.sh" }
+if { [module-info mode remove] } { puts "source /mnt/d/recRoot/GitRepos/dirdeck/deploy/../source/setenv.Linux.sh unload" }
+
+
