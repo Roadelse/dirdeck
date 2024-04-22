@@ -1,21 +1,34 @@
 #!/usr/bin/env python
 # coding=utf-8
 
+#@ Introduction
 """
 dms, denoting to Directory-Management-System, is designed to set location easily by name.
 This script acts as the backend of dms in Linux cluster (In Windows & WSL I prefer to use powershell as the backend)
 """
 
 
+#@ Import
+import sys
 import os
 import os.path
 import argparse
 import json
 
+
+#@ Prepare
+#@ .Check
+#@ ..pyver
+if sys.version_info < (3, 6):
+    print("This script requires Python version 3.6 or higher")
+    sys.exit(1)
+
+#@ .aux-functions
 def warning(msg: str):
     print(f"\033[33mWarning!\033[0m {msg}")
 
 
+#@ Main
 def save_dir(name: str, path: str):
     if not name:
         name = "main"
@@ -65,6 +78,7 @@ def clear_dirs():
         json.dump({}, open(reSG_dat, "w"))
 
 
+#@ Entry
 if __name__ == "__main__":
     global namedirs
 

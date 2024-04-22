@@ -16,14 +16,16 @@ export reSG_dat=$script_dir/../deploy/.reSG_dat
 
 #@ .dms | wrapper & executer for dms.py
 function dms() {
+    if [[ $1 == "g" && $2 == "list" ]]; then
+        $__dmspy $*
+        return
+    fi
     rst=$($__dmspy $*)
     echo $rst
     if [[ $? -ne 0 ]]; then
         return
     fi
-    if [[ $1 == "g" && $2 != "list" ]]; then
-        cd $rst
-    fi
+    cd $rst
 }
 
 function s() {
