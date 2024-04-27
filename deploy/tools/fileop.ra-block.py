@@ -54,7 +54,7 @@ def ra_nlines(basefile: str, rafile: str, cheader: Optional[str] = None, replace
                 header = cheader
         else:
             ext = os.path.splitext(basefile)[1]
-            header = headerStock[ext]
+            header = headerStock.get(ext, "")
         with open(basefile, "w") as f:
             f.write(header.replace(r"\n", "\n") + "\n\n")
             f.write(open(rafile, encoding="utf-8").read())
