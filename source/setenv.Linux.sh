@@ -23,7 +23,9 @@ function dms() {
     if [[ $? -ne 0 ]]; then
         return
     fi
-    cd $rst
+    if [[ $1 =~ ^'g ' || $1 == g ]]; then
+        cd $rst
+    fi
 }
 
 function s() {
