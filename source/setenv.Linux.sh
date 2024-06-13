@@ -72,3 +72,18 @@ function cdr() {
 function cd0() {
     cdr .
 }
+
+
+function cdRepo() {
+    local tardir=${PWD}
+    while [[ 1 ]]; do
+        if [[ $tardir == / ]]; then
+            return
+        fi
+        if [[ -e $tardir/.git ]]; then
+            cd $tardir
+            return
+        fi
+        tardir=$(dirname $tardir)
+    done
+}
